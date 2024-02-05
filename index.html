@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<h1>Tic Tac Toe</h1>
+
+<button id="toggleButton" onclick="toggleMode()">Switch to AI</button>
+<button id="resetButton" onclick="resetGame()">Reset Game</button>
+<div id="board"></div>
+<div id="lastWinner"></div>
+
+<script>
+    const board = document.getElementById('board');
+    const cells = [];
+    let currentPlayer = 'X'; 
+    let gameBoard = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+    let againstAI = false;
+    let lastWinner = null;
+
+    
+    for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.index = i;
+        cell.addEventListener('click', handleCellClick);
+        cells.push(cell);
+        board.appendChild(cell);
+    }
+
+    
+    function handleCellClick(event) {
+        const index = event.target.dataset.index;
+
+        if (gameBoard[index] === '' && gameActive) {
+            gameBoard[index] = currentPlayer;
+            cells[index].innerText = currentPlayer;
+            checkForWin();
+            checkForTie();
+            togglePlayer();
+
+            if (againstAI && currentPlayer === 'O' && gameActive) {
+        
+                setTimeout(makeRandomMove, 500);
+            }
+        }
+    }
+
+    // Make a random move for the AI
+    function makeRandomMove() {
+        const emptyCells = gameBoard.reduce((acc, value, index) => {
+            if (value === '') {
+                acc.push(index);
+            }
+            return acc;
+        }, []);
+
+        if (emptyCells.length > 0 && gameActive) {
+            const randomIndex = Math.floor(Math.random() * emptyCells.length);
+            const aiMove = emptyCells[randomIndex];
+            gameBoard[aiMove] = 'O';
+            cells[aiMove].innerText = 'O';
+            checkForWin();
+            checkForTie();
+            togglePlayer();
+        }
+    }
+
+    // Check for a win
+    function checkForWin() {
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], 
+           [0, 4, 8], [2, 4, 6]             
+        ];
+
+        for (const pattern of winPatterns) {
+            const [a, b, c] = pattern;
+            if (gameBoard[a] !== '' && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                lastWinner = currentPlayer;
+                alert(`${currentPlayer} wins!`);
+                gameActive = false;
+                displayLastWinner();
+                resetGame();
+                return;
+            }
+        }
+    }
+
+    // Check for a tie
+    function checkForTie() {
+        if (!gameBoard.includes('') && gameActive) {
+            alert('It\'s a tie!');
+            gameActive = false;
+            displayLastWinner();
+            resetGame();
+        }
+    }
+
+    // Switch players
+    function togglePlayer() {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    }
+
+    // Toggle between person and AI
+    function toggleMode() {
+        againstAI = !againstAI;
+        if (againstAI) {
+            document.getElementById('toggleButton').innerText = 'Switch to Person';
+        } else {
+            document.getElementById('toggleButton').innerText = 'Switch to AI';
+        }
+        resetGame();
+    }
+
+    // Reset the game
+    function resetGame() {
+        gameBoard = ['', '', '', '', '', '', '', '', ''];
+        gameActive = true;
+        currentPlayer = 'X';
+        cells.forEach(cell => {
+            cell.innerText = '';
+            cell.style.backgroundColor = '#61dafb';
+            cell.style.color = '#282c35';
+        });
+        displayLastWinner();
+    }
+
+    // Display the last winner
+    function displayLastWinner() {
+        if (lastWinner) {
+            document.getElementById('lastWinner').innerText = `Last Winner: ${lastWinner}`;
+        } else {
+            document.getElementById('lastWinner').innerText = '';
+        }
+    }
+</script>
+
+</body>
+</html>
